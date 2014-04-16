@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jgonera@gmail.com"]
   spec.summary       = %q{Framework-agnostic visual regression testing for web applications.}
   spec.description   = %q{Test for visual regressions using your existing testing stack.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/jgonera/photographer"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
