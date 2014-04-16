@@ -22,19 +22,30 @@ module Photographer
       @camera = block
     end
 
+    def update?
+      ENV["PHOTOGRAPHER"] == "update"
+    end
+
     def snap(name)
       path = File.join @dir, name + ".png"
-      path_new = File.join @dir, name + ".new.png"
+      unless File.exists?(path) || update?
+        raise "Snap missing. Run test with PHOTOGRAPHER=update to update."
+      end
 
+      path_new = File.join @dir, name + ".new.png"
       @camera.call path_new
-      raise "New snap too different!" if compare(path, path_new) > @max_difference
+
+      if update?
+        File.delete path if File.exists? path
+        File.rename path_new, path
+      elsif compare(path, path_new) > @max_difference
+        raise "New snap too different! Run test with PHOTOGRAPHER=update to update."
+      end
     end
 
     protected
 
     def compare(path, path_new)
-      return 0 unless File.exists? path
-
       # based on http://jeffkreeftmeijer.com/2011/comparing-images-and-creating-image-diffs/
       image = ChunkyPNG::Image.from_file path
       image_new = ChunkyPNG::Image.from_file path_new
