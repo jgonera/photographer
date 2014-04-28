@@ -2,6 +2,8 @@ require "photographer/version"
 require "oily_png"
 
 module Photographer
+  class PhotographerError < StandardError; end
+
   class << self
     attr_accessor :max_difference
 
@@ -27,9 +29,13 @@ module Photographer
     end
 
     def snap(name)
+      if !@camera
+        raise PhotographerError, "Camera not defined, use Photographer.configure!"
+      end
+
       path = File.join @dir, name + ".png"
       unless File.exists?(path) || update?
-        raise "Snap missing. Run test with PHOTOGRAPHER=update to update."
+        raise PhotographerError, "Snap missing. Run test with PHOTOGRAPHER=update to update."
       end
 
       path_new = File.join @dir, name + ".new.png"
@@ -39,7 +45,7 @@ module Photographer
         File.delete path if File.exists? path
         File.rename path_new, path
       elsif compare(path, path_new) > @max_difference
-        raise "New snap too different! Run test with PHOTOGRAPHER=update to update."
+        raise PhotographerError, "New snap too different! Run test with PHOTOGRAPHER=update to update."
       end
     end
 
