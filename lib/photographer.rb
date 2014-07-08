@@ -4,19 +4,17 @@ require "oily_png"
 module Photographer
   class PhotographerError < StandardError; end
 
+  @max_difference = 0.1
+
   class << self
     attr_accessor :max_difference
-
-    def initialize
-      @max_difference = 0.1
-    end
 
     def configure
       yield self
     end
 
     def dir=(path)
-      @dir = File.join path, "snaps"
+      @dir = path
       FileUtils.mkpath @dir
     end
 
