@@ -1,10 +1,15 @@
 require "spec_helper"
 
 describe Photographer do
+  let(:comparator) { double }
   before :each do
     Photographer.configure do |config|
       config.dir = snaps_dir
     end
+  end
+
+  it "uses BasicComparator as the default comparator" do
+    expect(Photographer.comparator).to be_a Photographer::Comparators::BasicComparator
   end
 
   describe ".snap" do
@@ -34,6 +39,9 @@ describe Photographer do
 
     context "when in normal mode" do
       before :each do
+        Photographer.configure do |config|
+          config.comparator = comparator
+        end
         Photographer.stub(:update?).and_return(false)
       end
 
@@ -41,15 +49,18 @@ describe Photographer do
         expect { Photographer.snap "test" }.to raise_error(/missing/i)
       end
 
-      it "raises an error when new snap too different" do
+      it "raises an error when comparison fails" do
         use_test_snap("test", "1.0white")
-        stub_camera("0.89white_0.11black")
-        expect { Photographer.snap "test" }.to raise_error(/too different/i)
+        expect(comparator).to receive(:compare)
+          .with(snap_path("test"), snap_path("test.new"))
+          .and_raise(Photographer::ComparisonError)
+        expect { Photographer.snap "test" }.to raise_error(Photographer::ComparisonError)
       end
 
-      it "doesn't raise an error when new snap not too different" do
+      it "doesn't raise an error when comparison successful" do
         use_test_snap("test", "1.0white")
-        stub_camera("0.9white_0.1black")
+        expect(comparator).to receive(:compare)
+          .with(snap_path("test"), snap_path("test.new"))
         expect { Photographer.snap "test" }.not_to raise_error
       end
     end

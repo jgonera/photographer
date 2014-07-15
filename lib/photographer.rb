@@ -1,13 +1,14 @@
 require "photographer/version"
-require "oily_png"
+require "photographer/comparators/basic_comparator"
 
 module Photographer
   class PhotographerError < StandardError; end
+  class ComparisonError < PhotographerError; end
 
-  @max_difference = 0.1
+  @comparator = Comparators::BasicComparator.new
 
   class << self
-    attr_accessor :max_difference
+    attr_accessor :comparator
 
     def configure
       yield self
@@ -42,27 +43,9 @@ module Photographer
       if update?
         File.delete path if File.exists? path
         File.rename path_new, path
-      elsif compare(path, path_new) > @max_difference
-        raise PhotographerError, "New snap too different! Run test with PHOTOGRAPHER=update to update."
+      else
+        @comparator.compare(path, path_new)
       end
-    end
-
-    protected
-
-    def compare(path, path_new)
-      # based on http://jeffkreeftmeijer.com/2011/comparing-images-and-creating-image-diffs/
-      image = ChunkyPNG::Image.from_file path
-      image_new = ChunkyPNG::Image.from_file path_new
-
-      diff_count = 0
-
-      image.height.times do |y|
-        image.row(y).each_with_index do |pixel, x|
-          diff_count += 1 unless pixel == image_new[x, y]
-        end
-      end
-
-      diff_count.to_f / image.pixels.length
     end
   end
 
