@@ -1,5 +1,6 @@
 require "photographer/version"
 require "photographer/comparators/basic_comparator"
+require "photographer/comparators/grid_comparator"
 
 module Photographer
   class PhotographerError < StandardError; end
