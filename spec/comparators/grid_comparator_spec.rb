@@ -16,20 +16,19 @@ describe Photographer::Comparators::GridComparator do
       }.not_to raise_error
     end
 
-    it "detects difference if image size not divisible by cell size" do
-      expect {
-        subject.compare test_snap_path("white_14x14"), test_snap_path("grid_5_4_last_cell_0.16")
-      }.to raise_error(Photographer::ComparisonError)
-    end
+    context "when image size not divisible by cell size" do
+      subject { Photographer::Comparators::GridComparator.new(cell_size: 6) }
 
-    it "ensures the right and bottom edge cells are the same size as other cells" do
-      expect {
-        subject.compare test_snap_path("white_11x11"), test_snap_path("grid_5_1_last_cell_0.12")
-      }.to raise_error(Photographer::ComparisonError)
+      it "raises an error" do
+        expect {
+          subject.compare test_snap_path("white_10x10"), test_snap_path("grid_5_all_cells_0.08")
+        }.to raise_error(Photographer::PhotographerError)
+      end
     end
 
     context "when maximum difference specified" do
       subject { Photographer::Comparators::GridComparator.new(max_difference: 0.05, cell_size: 5) }
+
       it "respects it" do
         expect {
           subject.compare test_snap_path("white_10x10"), test_snap_path("grid_5_all_cells_0.08")
