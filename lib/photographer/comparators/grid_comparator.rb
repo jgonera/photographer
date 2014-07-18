@@ -13,8 +13,8 @@ module Photographer
         @image_a = ChunkyPNG::Image.from_file path_a
         @image_b = ChunkyPNG::Image.from_file path_b
 
-        x_limit = @image_a.width / @cell_size
-        y_limit = @image_a.height / @cell_size
+        x_limit = @image_a.width / @cell_size + 1
+        y_limit = @image_a.height / @cell_size + 1
 
         y_limit.times do |y_offset|
           x_limit.times do |x_offset|
@@ -29,9 +29,11 @@ module Photographer
         diff_count = 0
 
         @cell_size.times do |cell_y|
+          y = @cell_size * y_offset + cell_y
+          break if y >= @image_a.height
           @cell_size.times do |cell_x|
             x = @cell_size * x_offset + cell_x
-            y = @cell_size * y_offset + cell_y
+            break if x >= @image_a.width
             diff_count += 1 unless @image_a[x, y] == @image_b[x, y]
           end
         end

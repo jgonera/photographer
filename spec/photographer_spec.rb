@@ -23,14 +23,14 @@ describe Photographer do
       end
 
       it "saves a named snap in given directory" do
-        stub_camera("white")
+        stub_camera("white_10x10")
         Photographer.snap "test"
         expect(File.exists?(snap_path("test"))).to eq true
-        expect(FileUtils.compare_file(snap_path("test"), test_snap_path("white"))).to eq true
+        expect(FileUtils.compare_file(snap_path("test"), test_snap_path("white_10x10"))).to eq true
       end
 
       it "replaces existing snap" do
-        use_test_snap("test", "white")
+        use_test_snap("test", "white_10x10")
         stub_camera("basic_0.1")
         Photographer.snap "test"
         expect(FileUtils.compare_file(snap_path("test"), test_snap_path("basic_0.1"))).to eq true
@@ -50,7 +50,7 @@ describe Photographer do
       end
 
       it "raises an error when comparison fails" do
-        use_test_snap("test", "white")
+        use_test_snap("test", "white_10x10")
         expect(comparator).to receive(:compare)
           .with(snap_path("test"), snap_path("test.new"))
           .and_raise(Photographer::ComparisonError)
@@ -58,7 +58,7 @@ describe Photographer do
       end
 
       it "doesn't raise an error when comparison successful" do
-        use_test_snap("test", "white")
+        use_test_snap("test", "white_10x10")
         expect(comparator).to receive(:compare)
           .with(snap_path("test"), snap_path("test.new"))
         expect { Photographer.snap "test" }.not_to raise_error
